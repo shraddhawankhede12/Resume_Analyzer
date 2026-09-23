@@ -14,11 +14,7 @@ function AnalyzerPage({ user }) {
 
   const handleFile = (file) => {
     if (!file) return;
-    setResumeFile(file.name);
-    const reader = new FileReader();
-    reader.onload = e => setResumeText(e.target.result);
-    // For docx/pdf, in a real app better extracting logic goes here or on backend
-    reader.readAsText(file);
+    setResumeFile(file);
   };
 
   const onDrop = e => {
@@ -31,13 +27,11 @@ function AnalyzerPage({ user }) {
     if (!jd.trim()) return setError('Please enter a job description.');
     setError(''); setLoading(true); setResults(null);
 
-    const rText = resumeText || '[PDF/DOCX file uploaded — analyze based on filename: ' + resumeFile + ']';
-
     try {
-      const data = await api.analyzeResume(rText, jd);
+      const data = await api.analyzeResume({ resumeFile, resumeText, jobDescription: jd });
       setResults(data);
     } catch(e) {
-      setError(e.response?.data?.error || 'Analysis failed. Please try again.');
+      setError(e.response?.data?.detail || 'Analysis failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -65,7 +59,7 @@ function AnalyzerPage({ user }) {
             onClick={()=>fileRef.current.click()}
           >
             {resumeFile ? (
-              <div className="text-green font-mono text-[1rem]">✓ {resumeFile}</div>
+              <div className="text-green font-mono text-[1rem]">✓ {resumeFile.name}</div>
             ) : (
               <>
                 <div className="text-[3rem] opacity-50 mb-2">⬆</div>

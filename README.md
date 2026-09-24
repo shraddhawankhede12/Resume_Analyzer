@@ -80,9 +80,13 @@ copy .env.example .env         # VITE_API_URL=http://localhost:5000
 npm run dev
 ```
 
-### Deploy (Render)
+### Deploy
 
-Start command: `gunicorn app:app`. Set the environment variables above, and use a Postgres `DATABASE_URL` (uncomment `psycopg2-binary` in requirements.txt) because Render's local disk is wiped on redeploy.
+**Backend on Render:** Dashboard > New > Blueprint > select this repo. [render.yaml](render.yaml) creates the Flask API and a Postgres database, and generates `JWT_SECRET`. When prompted, enter `OPENROUTER_API_KEY` and set `CORS_ORIGINS` to your Vercel URL. Note the API URL Render gives you.
+
+**Frontend on Vercel:** New Project > import this repo > set Root Directory to `client` (Vite is auto-detected) > add the environment variable `VITE_API_URL` = your Render API URL (no trailing slash) > Deploy. Then put the Vercel URL into the Live Demo link at the top of this file.
+
+Free-tier notes: the Render API sleeps after inactivity (first request is slow), and free Render Postgres databases expire after 30 days.
 
 ## Future Improvements
 

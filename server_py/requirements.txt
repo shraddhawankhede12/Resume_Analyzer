@@ -8,7 +8,7 @@ gunicorn==23.0.0            # production server (Render); use `python app.py` lo
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.54
 PyJWT==2.9.0
-# psycopg2-binary==2.9.9    # uncomment when DATABASE_URL points to Postgres
+psycopg2-binary==2.9.9     # Postgres driver (used on Render)
 
 # LLM + validation
 openai==1.54.4

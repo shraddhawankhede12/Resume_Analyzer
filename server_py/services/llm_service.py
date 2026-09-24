@@ -1,23 +1,39 @@
 import json
+import logging
 import os
+import re
+import time
 
-from fastapi import HTTPException
+from errors import ApiError
 from openai import OpenAI
 
+from logging_config import est_tokens
+
+log = logging.getLogger("resume.llm")
+
 _client: OpenAI | None = None
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 def _get_client() -> OpenAI:
     global _client
     if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:
-            raise HTTPException(status_code=500, detail="OPENAI_API_KEY is not configured on the server.")
-        _client = OpenAI(api_key=api_key)
+            raise ApiError(500, "OPENROUTER_API_KEY is not configured on the server.")
+        _client = OpenAI(
+            api_key=api_key,
+            base_url=OPENROUTER_BASE_URL,
+            default_headers={
+                "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost"),
+                "X-Title": "Resume Analyzer",
+            },
+        )
     return _client
 
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+MODEL = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free")
 
 SYSTEM_PROMPT = """You are an expert technical recruiter and career coach acting as an AI resume evaluation agent.
 Given a candidate's resume text and a target job description, you must:
@@ -47,7 +63,7 @@ Respond ONLY with strict JSON matching exactly this shape, no markdown, no comme
 """
 
 
-def analyze(resume_text: str, job_description: str) -> dict:
+def analyze(resume_text: str, job_description: str, rid: str = "-") -> dict:
     client = _get_client()
 
     user_prompt = f"""RESUME:
@@ -61,23 +77,75 @@ JOB DESCRIPTION:
 ---
 """
 
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+    prompt_chars = len(SYSTEM_PROMPT) + len(user_prompt)
+    log.info(
+        "[%s] LLM CALL model=%s prompt=%d chars (~%d tokens), chunks=1",
+        rid, MODEL, prompt_chars, est_tokens(prompt_chars),
+    )
+    start = time.perf_counter()
+
     try:
         response = client.chat.completions.create(
             model=MODEL,
             response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
+            messages=messages,
             temperature=0.3,
         )
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"LLM request failed: {exc}")
+        _check_response_error(response)
+    except ApiError:
+        raise
+    except Exception as first_exc:
+        # Some OpenRouter models (esp. free tier) reject response_format — retry without it.
+        log.warning("[%s] LLM CALL json mode failed (%s), retrying without response_format", rid, first_exc)
+        try:
+            response = client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                temperature=0.3,
+            )
+            _check_response_error(response)
+        except ApiError:
+            raise
+        except Exception as exc:
+            raise ApiError(502, f"LLM request failed: {exc}")
 
-    raw = response.choices[0].message.content
+    raw = response.choices[0].message.content or ""
+    usage = getattr(response, "usage", None)
+    log.info(
+        "[%s] LLM DONE %.1fs response=%d chars, provider tokens: prompt=%s completion=%s",
+        rid, time.perf_counter() - start, len(raw),
+        getattr(usage, "prompt_tokens", "n/a"), getattr(usage, "completion_tokens", "n/a"),
+    )
+    raw = _strip_code_fence(raw)
+
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
-        raise HTTPException(status_code=502, detail="LLM returned invalid JSON.")
+        log.error("[%s] PARSE JSON failed, LLM output was not valid JSON", rid)
+        raise ApiError(502, "LLM returned invalid JSON.")
 
+    log.info(
+        "[%s] PARSE JSON ok score=%s matched=%d missing=%d",
+        rid, data.get("score"), len(data.get("matched", [])), len(data.get("missing", [])),
+    )
     return data
+
+
+def _check_response_error(response) -> None:
+    error = getattr(response, "error", None)
+    if error:
+        message = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+        raise ApiError(503, f"Model provider error: {message}")
+    if not response.choices:
+        raise ApiError(502, "LLM returned no response choices.")
+
+
+def _strip_code_fence(text: str) -> str:
+    text = text.strip()
+    match = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, re.DOTALL)
+    return match.group(1) if match else text

@@ -8,7 +8,7 @@ function Results({ data }) {
   return (
     <div className="animate-slide-up mt-10">
       <div className="font-display text-[1rem] text-cyan-dim tracking-[0.2em] uppercase mb-8 pb-3 border-b border-border">
-        // ANALYSIS COMPLETE — {new Date().toLocaleTimeString()}
+        ANALYSIS COMPLETE — {new Date().toLocaleTimeString()}
       </div>
 
       {/* Score */}

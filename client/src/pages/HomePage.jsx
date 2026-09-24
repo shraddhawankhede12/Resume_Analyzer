@@ -10,7 +10,7 @@ function HomePage({ onLogin, onSignup, user, onGoAnalyzer }) {
   return (
     <div className="min-h-[calc(100vh-60px)] flex flex-col items-center justify-center text-center p-8 md:p-16 relative">
       <div className="font-mono text-[0.85rem] text-cyan-dim border border-border py-2 px-5 mb-8 tracking-[0.15em] animate-slide-up bg-[#000a1499] backdrop-blur-[6px]">
-        // AI-POWERED CAREER INTELLIGENCE SYSTEM v2.0
+        AI-POWERED CAREER INTELLIGENCE SYSTEM v2.0
       </div>
       <h1 className="font-display text-[clamp(2.5rem,7vw,5.5rem)] font-black leading-none tracking-tight mb-6 animate-slide-up" style={{animationDelay:'0.1s'}}>
         <span className="block text-text-primary">DECODE YOUR</span>

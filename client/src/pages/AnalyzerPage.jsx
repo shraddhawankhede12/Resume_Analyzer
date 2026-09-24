@@ -41,7 +41,7 @@ function AnalyzerPage({ user }) {
     <div className="max-w-[1240px] mx-auto p-10">
       <div className="mb-10 animate-slide-up">
         <div className="font-display text-[2.5rem] tracking-wider font-bold mb-2 [text-shadow:0_0_6px_rgba(0,255,255,0.3)]">RESUME <span className="text-cyan">ANALYZER</span></div>
-        <div className="font-mono text-[1rem] text-text-muted mt-1 bg-[#000a14a6] backdrop-blur-[4px] py-2 px-4 inline-block rounded-md border border-border">// neural match engine — upload resume + job description to begin</div>
+        <div className="font-mono text-[1rem] text-text-muted mt-1 bg-[#000a14a6] backdrop-blur-[4px] py-2 px-4 inline-block rounded-md border border-border">neural match engine — upload resume + job description to begin</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -49,7 +49,7 @@ function AnalyzerPage({ user }) {
         <div className="bg-[#000a14a6] backdrop-blur-[6px] rounded-xl border border-border p-8 relative animate-slide-up shadow-lg" style={{animationDelay:'0.1s'}}>
           <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-cyan-dark to-transparent"></div>
           <div className="font-mono text-[0.95rem] text-cyan-dim tracking-[0.15em] uppercase mb-6 flex items-center gap-2">
-            <span className="text-text-muted">//</span> Resume Input
+            Resume Input
           </div>
           <div
             className={`border-2 border-dashed min-h-[160px] flex flex-col items-center justify-center gap-4 cursor-pointer transition-all p-10 rounded-lg text-center ${drag ? 'border-cyan bg-cyan-dark' : 'border-border bg-[#040c12] hover:border-cyan hover:bg-cyan-dark/50'}`}
@@ -79,7 +79,7 @@ function AnalyzerPage({ user }) {
         <div className="bg-[#000a14a6] backdrop-blur-[6px] rounded-xl border border-border p-8 relative animate-slide-up shadow-lg" style={{animationDelay:'0.2s'}}>
           <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-cyan-dark to-transparent"></div>
           <div className="font-mono text-[0.95rem] text-cyan-dim tracking-[0.15em] uppercase mb-6 flex items-center gap-2">
-            <span className="text-text-muted">//</span> Job Description
+            Job Description
           </div>
           <textarea
             className="w-full bg-[#040c12] border border-border rounded-lg text-text-primary font-mono text-[1rem] p-5 outline-none resize-y h-[calc(100%-4rem)] min-h-[300px] transition-colors leading-[1.6] focus:border-cyan placeholder-text-sec/60"

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(./venv/Scripts/python.exe -c \"import main; print\\('OK'\\)\")",
+      "Bash(./venv/Scripts/python.exe -m pip install -q -r requirements.txt)",
+      "Bash(netstat -ano)",
+      "Bash(nohup ./venv/Scripts/python.exe -m uvicorn main:app --reload --port 5000)",
+      "Bash(disown)",
+      "Bash(curl -s http://127.0.0.1:5000/health)",
+      "Bash(curl -s -X POST http://127.0.0.1:5000/api/analyze -F \"job_description=We need a backend engineer skilled in Python, FastAPI, and SQL\" -F \"resume_text=I have 3 years experience with Python and Django, familiar with PostgreSQL\")",
+      "Bash(./venv/Scripts/python.exe -c ' *)",
+      "Bash(grep -n \"TypeError\\\\|File \\\\\"D:\\\\\\\\\\\\\\\\resume analyzer\\\\\\\\\\\\\\\\server_py\\\\\\\\\\\\\\\\services\\\\\\\\\\\\\\\\llm_service.py\\\\\"\" uvicorn_run.log)"
+    ]
+  }
+}
